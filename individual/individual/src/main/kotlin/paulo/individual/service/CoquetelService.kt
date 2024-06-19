@@ -1,6 +1,7 @@
 package paulo.individual.service
 
 import org.modelmapper.ModelMapper
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -11,6 +12,7 @@ import paulo.individual.repository.CopoRepository
 import paulo.individual.repository.CoquetelRepository
 import paulo.individual.repository.GuarnicaoRepository
 import paulo.individual.repository.PreparoRepository
+import java.lang.Exception
 
 @Service
 class CoquetelService(
@@ -21,27 +23,29 @@ class CoquetelService(
     private val preparoRepository: PreparoRepository
 ) {
 
-    fun insertCoquetel(coquetel:CoquetelDtoInput):Coquetel{
+    /*fun insertCoquetel(coquetel:CoquetelDtoInput):Coquetel{
 
         if(repository.existsByNome(coquetel.nome)){
             throw ResponseStatusException(HttpStatusCode.valueOf(400))
         }
+
+        val novoPreparo = preparoRepository.findByPreparo(coquetel.preparo.preparo)
 
         val novoCoquetel = Coquetel(
             id = null,
             nome = coquetel.nome,
             descricao = coquetel.descricao,
             lista_ingredientes = coquetel.lista_ingredientes,
-            preparo = preparoRepository.findByPreparo(coquetel.preparo.preparo),
-            guarnicao = guarnicaoRepository.findByTipoGuarnicao(coquetel.guarnicao.tipoGuarnicao),
-            copo = copoRepository.findByNome(coquetel.copo.nome)
+            preparo = coquetel.preparo,
+            guarnicao = coquetel.guarnicao,
+            copo = coquetel.copo
         )
 
         repository.save(novoCoquetel)
 
         return novoCoquetel
 
-    }
+    }*/
 
     fun getListaCoquetel():List<CoquetelDtoResponse>{
 
@@ -88,7 +92,7 @@ class CoquetelService(
         throw ResponseStatusException(HttpStatusCode.valueOf(404))
     }
 
-    fun attCoquetelById(coquetelInput: CoquetelDtoInput, id: Long):Coquetel{
+    /*fun attCoquetelById(coquetelInput: CoquetelDtoInput, id: Long):Coquetel{
 
 
         validarCoquetel(coquetelInput)
@@ -98,13 +102,61 @@ class CoquetelService(
             antigo.nome = coquetelInput.nome
             antigo.descricao = coquetelInput.descricao
             antigo.lista_ingredientes = coquetelInput.lista_ingredientes
-            antigo.preparo = preparoRepository.findByPreparo(coquetelInput.preparo.preparo)
+            antigo.preparo = PreparoDtoInput
             antigo.copo = copoRepository.findByNome(coquetelInput.copo.nome)
             antigo.guarnicao = guarnicaoRepository.findByTipoGuarnicao(coquetelInput.guarnicao.tipoGuarnicao)
 
         repository.save(antigo)
 
         return antigo
+    } */
+
+    fun insertCoquetel(coquetel: CoquetelDtoInput): CoquetelDtoResponse{
+        if(repository.existsByNome(coquetel.nome)){
+            throw ResponseStatusException(HttpStatusCode.valueOf(404))
+        }
+
+        val novoCoquetel = Coquetel(
+            id = null,
+            nome = coquetel.nome,
+            descricao = coquetel.descricao,
+            lista_ingredientes = coquetel.lista_ingredientes,
+            preparo = coquetel.preparo,
+            guarnicao = coquetel.guarnicao,
+            copo = coquetel.copo
+        )
+
+        return try{
+            val coquetelSalvo = repository.save(novoCoquetel)
+            CoquetelDtoResponse(
+                nome = coquetelSalvo.nome,
+                descricao = coquetelSalvo.descricao
+            )
+        }catch (ex: Exception) {
+            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao cadastrar Coquetel: ${ex.message}")
+        }
+    }
+
+    fun attCoquetel(id: Long, coquetel: CoquetelDtoInput): CoquetelDtoResponse {
+        val coquetelExistente = repository.findById(id).orElseThrow {ResponseStatusException(HttpStatus.NOT_FOUND, "Coquetel não encontrado")}
+
+        coquetelExistente.nome = coquetel.nome
+        coquetelExistente.descricao = coquetel.descricao
+        coquetelExistente.lista_ingredientes = coquetel.lista_ingredientes
+        coquetelExistente.preparo = coquetel.preparo
+        coquetelExistente.guarnicao = coquetel.guarnicao
+        coquetelExistente.copo = coquetel.copo
+
+        return try {
+            val coquetelAtualizado = repository.save(coquetelExistente)
+            CoquetelDtoResponse(
+                nome = coquetelAtualizado.nome,
+                descricao = coquetelAtualizado.descricao
+            )
+        } catch (ex: Exception) {
+            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao atualizar coquetel: ${ex.message}")
+        }
+
     }
 
     fun getCoquetelById(id:Long):Coquetel{

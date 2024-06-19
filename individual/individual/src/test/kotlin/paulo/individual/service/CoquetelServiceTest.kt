@@ -5,11 +5,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.modelmapper.ModelMapper
-import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import paulo.individual.domain.Copo
 import paulo.individual.domain.Coquetel
@@ -20,7 +18,6 @@ import paulo.individual.dtos.CoquetelDtoInput
 import paulo.individual.dtos.GuarnicaoDtoInput
 import paulo.individual.dtos.PreparoDtoInput
 import paulo.individual.repository.CoquetelRepository
-import java.util.*
 
 class CoquetelServiceTest {
 
@@ -96,12 +93,12 @@ class CoquetelServiceTest {
 
         val coquetelEsperado = Coquetel(
             id = 3,
-            nome= " caipiroska",
+            nome = " caipiroska",
             descricao = "Versão do classico Brasileiro com base de Vodka, limão e açúcar",
             lista_ingredientes =  "Vodka, Meio limão , Açúcar",
             preparo = Preparo(3, "Montado"),
             guarnicao = Guarnicao(3,"Rodela de limão"),
-            copo= Copo(3, "Copo Baixo", "Copo para coquetéis médios ou degustação de destilados tanto puros como sobre gelo"
+            copo = Copo(3, "Copo Baixo", "Copo para coquetéis médios ou degustação de destilados tanto puros como sobre gelo"
             )
         )
         `when`(coquetelService.attCoquetelById(coquetelParam, idParam)).thenReturn(coquetelEsperado)
